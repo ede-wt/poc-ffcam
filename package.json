@@ -1,0 +1,21 @@
+{
+  "name": "ffcam",
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "packageManager": "bun@1.2.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:api": "turbo dev -F @ffcam/api",
+    "build:client": "turbo build -F @ffcam/client",
+    "preview:client": "turbo preview -F @ffcam/client",
+    "db:push": "turbo db:push --F @ffcam/api"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.6"
+  },
+  "dependencies": {
+    "client": "^0.0.1"
+  }
+}

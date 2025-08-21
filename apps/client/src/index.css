@@ -66,3 +66,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+[data-done="true"] > p {
+    text-decoration: line-through;
+    color: #888;
+}

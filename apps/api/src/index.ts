@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { db } from "./db";
 import { todos } from "./db/schema";
+import { eq } from "drizzle-orm";
 
 const app = new Hono();
 
@@ -24,6 +25,24 @@ app.post("/todos", async (c) => {
     .returning();
 
   return c.json(todo, 201);
+});
+
+app.put("/todos/:id", async (c) => {
+  const id = c.req.param("id");
+  const { title, done } = await c.req.json();
+  const todo = await db
+    .update(todos)
+    .set({ title, done })
+    .where(eq(todos.id, +id))
+    .returning();
+
+  return c.json(todo, 200);
+});
+
+app.delete("/todos/:id", async (c) => {
+  const id = c.req.param("id");
+  const todo = await db.delete(todos).where(eq(todos.id, +id)).returning();
+  return c.json(todo, 200);
 });
 
 export default app;

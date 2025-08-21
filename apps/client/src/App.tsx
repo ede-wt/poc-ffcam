@@ -8,7 +8,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import React from "react";
-import { todosKeys, useTodos } from "./queries/todos";
+import { todosKeys, useTodo, useTodos } from "./queries/todos";
 import * as api from "./queries/todos/api";
 import toast, { Toaster } from "react-hot-toast";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
@@ -58,6 +58,20 @@ queryClient.setMutationDefaults(todosKeys.all(), {
   },
 });
 
+queryClient.setMutationDefaults(todosKeys.delete(), {
+  mutationFn: async ({ id }: any) => {
+    await queryClient.cancelQueries({ queryKey: todosKeys.all() });
+    return await api.deleteTodo(id);
+  },
+});
+
+queryClient.setMutationDefaults(todosKeys.update(), {
+  mutationFn: async (todo: any) => {
+    await queryClient.cancelQueries({ queryKey: todosKeys.all() });
+    return await api.updateTodo(todo.id, todo);
+  },
+});
+
 function App() {
   return (
     <PersistQueryClientProvider
@@ -96,9 +110,18 @@ function Todos() {
   return (
     <div>
       <h1>Todos</h1>
-      <ul>
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+          textAlign: "left",
+          display: "grid",
+          gridTemplateColumns: "24px 1fr min-content",
+          gap: "16px",
+        }}
+      >
         {todosQuery.data?.map((todo: any) => (
-          <li key={todo.id}>{todo.title}</li>
+          <Todo todo={todo} key={todo.id} />
         ))}
       </ul>
 
@@ -123,6 +146,36 @@ function Todos() {
         </div>
       </form>
     </div>
+  );
+}
+
+function Todo({ todo }: any) {
+  const { deleteTodo, updateTodo } = useTodo();
+
+  return (
+    <li
+      key={todo.id}
+      style={{
+        display: "grid",
+        gridColumn: "-1 / 1",
+        gridTemplateColumns: "subgrid",
+        alignItems: "center",
+      }}
+      data-done={todo.done ? "true" : undefined}
+    >
+      <span
+        style={{
+          textAlign: "center",
+          display: "inline-block",
+          cursor: "pointer",
+        }}
+        onClick={() => updateTodo.mutate({ id: todo.id, done: !todo.done })}
+      >
+        {todo.done ? "✅" : "⏺"}
+      </span>
+      <p>{todo.title}</p>
+      <button onClick={() => deleteTodo.mutate({ id: todo.id })}>🗑️</button>
+    </li>
   );
 }
 
